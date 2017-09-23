@@ -44,7 +44,10 @@ TagManager:
   - name: Background
     uniqueID: 2676656975
     locked: 0
-  - name: Cleaned
+  - name: Obstacles
+    uniqueID: 687752799
+    locked: 0
+  - name: Bars
     uniqueID: 1951140983
     locked: 0
   - name: Player

@@ -78,11 +78,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\CubeOneController.cs" />
-    <Compile Include="Assets\FollowControler.cs" />
-    <Compile Include="Assets\FollowController.cs" />
+    <Compile Include="Assets\Direction.cs" />
     <Compile Include="Assets\FullCubeContoller.cs" />
+    <Compile Include="Assets\GameManager.cs" />
+    <Compile Include="Assets\Grid.cs" />
+    <Compile Include="Assets\GridTools.cs" />
     <Compile Include="Assets\PlayerController.cs" />
+    <Compile Include="Assets\RobotController.cs" />
     <Compile Include="Assets\scri.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

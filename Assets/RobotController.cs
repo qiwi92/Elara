@@ -10,9 +10,9 @@ public class RobotController : MonoBehaviour {
 
 
     private float currentTime = 0f;
-    private float velocity = 400f;
+    private float velocity = 48f;
     private float timeToMove;
-    private float restTime = 0.05f;
+    private float restTime = 1f;
     private float tempTime = 0f;
 
     private Grid _grid = new Grid();
@@ -20,24 +20,25 @@ public class RobotController : MonoBehaviour {
     private Direction direction;
 
     private float gridCellSize = 16f;
-    private float restTimeBetween = 0.05f;
+    private float restTimeBetween = 0.5f;
 	// Use this for initialization
 	void Start () {
         direction = Direction.up;
-        timeToMove = gridCellSize / velocity;
+        timeToMove = Grid.GridUnit / velocity;
 
-
-        Cubes[0].transform.position = new Vector3(180, 40, 0);
+        Cubes[0].transform.position = new Vector3(180, 45, 0);
         QuantizeCubes();
         Cubes[1].transform.position = Cubes[0].transform.position + new Vector3(16, 0, 0);
         Cubes[2].transform.position = Cubes[0].transform.position + new Vector3(0, -16, 0);
         Cubes[3].transform.position = Cubes[0].transform.position + new Vector3(16, -16, 0);
-        
+
+        Application.targetFrameRate = 60;
 
     }
 	
 	// Update is called once per frame
 	void Update () {
+        
         float t = Time.deltaTime;
         
         currentTime += t;
@@ -47,14 +48,12 @@ public class RobotController : MonoBehaviour {
 
 
 
+
         if (currentTime < timeToMove)
         {
+            Debug.Log(currentTime);
             List<int> moveGroupIndices = direction.FrontMoveGroup();
-            MoveGroup(direction, translate, moveGroupIndices);
-
-            
-
-            
+            MoveGroup(direction, translate, moveGroupIndices);           
         }
         if (FirstCubeMoveTimeExeeded)
         {
@@ -82,17 +81,14 @@ public class RobotController : MonoBehaviour {
                 int decider = UnityEngine.Random.Range(0, 3);
                 if (decider == 0)
                 {
-                    Debug.Log(decider);
                     direction = direction.TurnLeft();
                 }
                 else if (decider == 1)
                 {
                     direction = direction.TurnRight();
                 }
-            }
-
-            
-            currentTime = 0;
+            } 
+            currentTime -= (2 * timeToMove + restTimeBetween + restTime);
         }
 
 

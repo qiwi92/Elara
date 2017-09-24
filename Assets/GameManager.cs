@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour {
             {
                 if(Grid._grid[x, y] == 1)
                 {
-                    Instantiate(Stones[0],new Vector3(x*Grid.GridUnit,y*Grid.GridUnit,0),transform.rotation);
+                    Instantiate(Stones[0],new Vector3(Grid.GridXOffset+x*Grid.GridUnit,y*Grid.GridUnit,0),transform.rotation);
                 }
             }
         }

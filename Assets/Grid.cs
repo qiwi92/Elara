@@ -11,6 +11,7 @@ namespace Assets
     public class Grid
     {
         public static readonly int GridUnit = 16;
+        public static readonly int GridXOffset = 7;
         public static readonly Vector3 GridOffset = new Vector3(16, 16, 0);
 
         public static readonly int gridWidth = 16;

@@ -1,104 +1,84 @@
-﻿using System.Collections;
+﻿using Debug = UnityEngine.Debug;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 using Assets;
 
-public class RobotController : MonoBehaviour {
-
+public class RobotController : MonoBehaviour
+{
     public List<GameObject> Cubes;
 
-
-    private float currentTime = 0f;
     private float velocity = 48f;
     private float timeToMove;
-    private float restTime = 1f;
-    private float tempTime = 0f;
+    private const float RestTime = 1f;
+    private const float RestTimeBetween = 0.5f;
+
+    public LeanTweenType TweenType;
 
     private Grid _grid = new Grid();
-
     private Direction direction;
 
-    private float gridCellSize = 16f;
-    private float restTimeBetween = 0.5f;
-	// Use this for initialization
-	void Start () {
+	private void Start()
+    {
         direction = Direction.up;
         timeToMove = Grid.GridUnit / velocity;
 
-        Cubes[0].transform.position = new Vector3(180, 45, 0);
-        QuantizeCubes();
+        Cubes[0].transform.position = new Vector3(Grid.GridXOffset + Grid.GridUnit * 3, Grid.GridUnit*3, 0);
         Cubes[1].transform.position = Cubes[0].transform.position + new Vector3(16, 0, 0);
         Cubes[2].transform.position = Cubes[0].transform.position + new Vector3(0, -16, 0);
         Cubes[3].transform.position = Cubes[0].transform.position + new Vector3(16, -16, 0);
 
         Application.targetFrameRate = 60;
-
+        StartCoroutine(MoveRoutine());
     }
-	
-	// Update is called once per frame
-	void Update () {
-        
-        float t = Time.deltaTime;
-        
-        currentTime += t;
 
-        float translate = t * velocity;
-        
-
-
-
-
-        if (currentTime < timeToMove)
+    private IEnumerator MoveRoutine()
+    {
+        while (true)
         {
-            Debug.Log(currentTime);
-            List<int> moveGroupIndices = direction.FrontMoveGroup();
-            MoveGroup(direction, translate, moveGroupIndices);           
+            yield return StartCoroutine(MoveParts(direction.FrontMoveGroup(), timeToMove));
+
+            yield return new WaitForSeconds(RestTimeBetween);
+
+            // Later maybe check whether to move second part based on collisions
+            yield return StartCoroutine(MoveParts(direction.Opposite().FrontMoveGroup(), timeToMove));
+
+            yield return new WaitForSeconds(RestTime);
+            
+            ChooseNextDirection();
         }
-        if (FirstCubeMoveTimeExeeded)
+    }
+    
+    private IEnumerator MoveParts(List<int> moveGroupIndices, float duration)
+    {
+        LeanTween.move(Cubes[moveGroupIndices[0]], Cubes[moveGroupIndices[0]].transform.position + direction.DirectionToVector() * Grid.GridUnit, duration).setEase(TweenType);
+        LeanTween.move(Cubes[moveGroupIndices[1]], Cubes[moveGroupIndices[1]].transform.position + direction.DirectionToVector() * Grid.GridUnit, duration).setEase(TweenType);
+
+        yield return new WaitForSeconds(duration);
+    }
+    
+    private void ChooseNextDirection()
+    {
+        List<int> moveGroupIndices = direction.FrontMoveGroup();
+        bool collision = CheckCollision(moveGroupIndices, direction);
+        if (collision == true)
         {
-            QuantizeCubes();
+            direction = direction.Opposite();
         }
-        if (FirstCubeRestTimeExeeded)
+        else
         {
-            List<int> moveGroupIndices = direction.Opposite().FrontMoveGroup();
-            MoveGroup(direction, translate, moveGroupIndices);
-        }
-        if (SecondCubeMoveTimeExeeded)
-        {
-            QuantizeCubes();
-        }
-        if (SecondCubeRestTimeExeeded)
-        {
-            List<int> moveGroupIndices = direction.FrontMoveGroup();
-            bool collision = CheckCollision(moveGroupIndices, direction);
-            if (collision == true)
+            int decider = UnityEngine.Random.Range(0, 3);
+            if (decider == 0)
             {
-                direction = direction.Opposite();
+                direction = direction.TurnLeft();
             }
-            else
+            else if (decider == 1)
             {
-                int decider = UnityEngine.Random.Range(0, 3);
-                if (decider == 0)
-                {
-                    direction = direction.TurnLeft();
-                }
-                else if (decider == 1)
-                {
-                    direction = direction.TurnRight();
-                }
-            } 
-            currentTime -= (2 * timeToMove + restTimeBetween + restTime);
+                direction = direction.TurnRight();
+            }
         }
-
-
-        
-        
-        //Debug.Log(_grid.IsInGrid(Cubes[0].transform.position));
-
     }
-
-
+    
     private bool CheckCollision(List<int> moveGroupIndices,Direction direction)
     {
         bool isInGrid;
@@ -120,40 +100,5 @@ public class RobotController : MonoBehaviour {
             }
         }
         return false;
-        
-    }
-
-    private void QuantizeCubes()
-    {
-        for(int i=0; i <=3; i++)
-        {
-            Cubes[i].transform.position = Cubes[i].transform.position.QuantizePosition();
-        }
-    }
-
-    private void MoveGroup(Direction direction, float translate, List<int> moveGroupIndices)
-    {   
-        Cubes[moveGroupIndices[0]].transform.position += translate * direction.DirectionToVector();
-        Cubes[moveGroupIndices[1]].transform.position += translate * direction.DirectionToVector();
-    }
-
-    private bool FirstCubeMoveTimeExeeded
-    {
-        get { return timeToMove < currentTime && currentTime < timeToMove + restTimeBetween; }
-    }
-
-    private bool FirstCubeRestTimeExeeded
-    {
-        get { return timeToMove + restTimeBetween < currentTime && currentTime < 2 * timeToMove + restTimeBetween; }
-    }
-
-    private bool SecondCubeMoveTimeExeeded
-    {
-        get { return 2 * timeToMove + restTimeBetween < currentTime; }
-    }
-
-    private bool SecondCubeRestTimeExeeded
-    {
-        get { return 2 * timeToMove + restTimeBetween + restTime < currentTime; }
     }
 }

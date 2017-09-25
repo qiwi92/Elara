@@ -8,10 +8,12 @@ public class RobotController : MonoBehaviour
 {
     public List<GameObject> Cubes;
 
-    private float velocity = 48f;
+    private Grid StoneGrid = new Grid();
+
+    private float velocity = 60f;
     private float timeToMove;
-    private const float RestTime = 1f;
-    private const float RestTimeBetween = 0.5f;
+    private const float RestTime = 0.5f;
+    private const float RestTimeBetween = 0.2f;
 
     public LeanTweenType TweenType;
 
@@ -30,6 +32,8 @@ public class RobotController : MonoBehaviour
 
         Application.targetFrameRate = 60;
         StartCoroutine(MoveRoutine());
+
+        
     }
 
     private IEnumerator MoveRoutine()
@@ -46,6 +50,7 @@ public class RobotController : MonoBehaviour
             yield return new WaitForSeconds(RestTime);
             
             ChooseNextDirection();
+
         }
     }
     
@@ -60,26 +65,29 @@ public class RobotController : MonoBehaviour
     private void ChooseNextDirection()
     {
         List<int> moveGroupIndices = direction.FrontMoveGroup();
-        bool collision = CheckCollision(moveGroupIndices, direction);
-        if (collision == true)
+       
+
+        int decider = UnityEngine.Random.Range(0, 3);
+        if (decider == 0)
+        {
+            direction = direction.TurnLeft();
+        }
+        else if (decider == 1)
+        {
+            direction = direction.TurnRight();
+        }
+
+        List<int> moveGroupIndicesAfterTurn = direction.FrontMoveGroup();
+        bool collision = CheckGridCollision(moveGroupIndicesAfterTurn, direction);
+        bool collisionStone = StoneCollision(moveGroupIndicesAfterTurn, direction);
+        if (collision == true || collisionStone == true)
         {
             direction = direction.Opposite();
         }
-        else
-        {
-            int decider = UnityEngine.Random.Range(0, 3);
-            if (decider == 0)
-            {
-                direction = direction.TurnLeft();
-            }
-            else if (decider == 1)
-            {
-                direction = direction.TurnRight();
-            }
-        }
+
     }
     
-    private bool CheckCollision(List<int> moveGroupIndices,Direction direction)
+    private bool CheckGridCollision(List<int> moveGroupIndices,Direction direction)
     {
         bool isInGrid;
         for (int i = 0; i <= moveGroupIndices.Count; i++)
@@ -98,6 +106,54 @@ public class RobotController : MonoBehaviour
             {
                 return true;
             }
+        }
+        return false;
+    }
+
+    private bool StoneCollision(List<int> moveGroupIndices, Direction direction)
+    {
+        for (int i = 0; i <= moveGroupIndices.Count; i++)
+        {
+            int xPos = (int)GridTools.GridPosition(Cubes[i].transform.position).x;
+            int yPos = (int)GridTools.GridPosition(Cubes[i].transform.position).y;
+            int nextX = (int)direction.DirectionToVector().x;
+            int nextY = (int)direction.DirectionToVector().y;
+
+            if (xPos +nextX < Grid.gridWidth || xPos + nextX > 0)
+            {
+                if (direction == Direction.up || direction == Direction.right)
+                {
+                    
+                    for (int y = 0; y < Grid.gridHeight; y++)
+                    {
+                        for (int x = 0; x < Grid.gridWidth; x++)
+                        {
+                            if (StoneGrid._grid[xPos +  nextX, yPos + nextY] == 1)
+                            {
+                                Debug.Log("Next x:" + xPos + "-> " + nextX + " / Next y: " + xPos + "-> " + nextY);
+                                return true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    
+                    for (int y = 0; y < Grid.gridHeight; y++)
+                    {
+                        for (int x = 0; x < Grid.gridWidth; x++)
+                        {
+                            if (StoneGrid._grid[xPos + nextX, yPos + nextY] == 1)
+                            {
+                                Debug.Log("Next x:" + xPos + "-> " + nextX + " / Next y: " + xPos + "-> " + nextY);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            //var bla = StoneGrid._grid[x, y];
+
         }
         return false;
     }

@@ -17,20 +17,6 @@ namespace Assets
             var xGridPos = Mathf.Round((xPos - xBorderWidth) / 16f);
             var yGridPos = Mathf.Round(yPos / 16f);
             return new Vector3(xGridPos, yGridPos, 0f);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         }
 
         public static Vector3 QuantizePosition(this Vector3 currentPosition)

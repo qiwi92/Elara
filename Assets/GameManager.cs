@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets;
 
+namespace Assets
+{
 public class GameManager : MonoBehaviour {
 
-    public Grid Grid = new Grid();
+    public static Grid StoneGrid = new Grid();
 
     public List<GameObject> Stones;
 
@@ -14,7 +16,7 @@ public class GameManager : MonoBehaviour {
         {
             for (int x = 0; x < Grid.gridWidth; x++)
             {
-                if(Grid._grid[x, y] == 1)
+                if(StoneGrid._grid[x, y] == 1)
                 {
                     Instantiate(Stones[0],new Vector3(Grid.GridXOffset+x*Grid.GridUnit,y*Grid.GridUnit,0),transform.rotation);
                 }
@@ -26,4 +28,6 @@ public class GameManager : MonoBehaviour {
 	void Update () {
 		
 	}
+}
+
 }

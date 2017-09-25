@@ -30,6 +30,21 @@ namespace Assets
                         _grid[x,y] = 1;
                     }
 
+                    if (x == 7 && y == 10)
+                    {
+                        _grid[x, y] = 1;
+                    }
+
+                    if (x == 4 && y == 12)
+                    {
+                        _grid[x, y] = 1;
+                    }
+
+                    if (x == 5 && y == 4)
+                    {
+                        _grid[x, y] = 1;
+                    }
+
                     if (x == 8 &&  y == 20)
                     {
                         _grid[x, y] = 1;

@@ -10,10 +10,10 @@ public class RobotController : MonoBehaviour
 
     private Grid StoneGrid = new Grid();
 
-    private float velocity = 60f;
+    private float velocity = 400f;
     private float timeToMove;
-    private const float RestTime = 0.5f;
-    private const float RestTimeBetween = 0.2f;
+    private const float RestTime = 0.1f;
+    private const float RestTimeBetween = 0.05f;
 
     public LeanTweenType TweenType;
 
@@ -80,7 +80,11 @@ public class RobotController : MonoBehaviour
         List<int> moveGroupIndicesAfterTurn = direction.FrontMoveGroup();
         bool collision = CheckGridCollision(moveGroupIndicesAfterTurn, direction);
         bool collisionStone = StoneCollision(moveGroupIndicesAfterTurn, direction);
-        if (collision == true || collisionStone == true)
+        if (collision == true) 
+        {
+            direction = direction.Opposite();
+        }
+        else if (collisionStone == true ) 
         {
             direction = direction.Opposite();
         }
@@ -119,7 +123,7 @@ public class RobotController : MonoBehaviour
             int nextX = (int)direction.DirectionToVector().x;
             int nextY = (int)direction.DirectionToVector().y;
 
-            if (xPos +nextX < Grid.gridWidth || xPos + nextX > 0)
+            if (xPos +nextX < Grid.gridWidth && xPos + nextX > 0 && yPos + nextY < Grid.gridHeight && yPos + nextY > 0)
             {
                 if (direction == Direction.up || direction == Direction.right)
                 {
@@ -130,7 +134,7 @@ public class RobotController : MonoBehaviour
                         {
                             if (StoneGrid._grid[xPos +  nextX, yPos + nextY] == 1)
                             {
-                                Debug.Log("Next x:" + xPos + "-> " + nextX + " / Next y: " + xPos + "-> " + nextY);
+                                Debug.Log("Next x:" + xPos + "-> " + xPos + nextX + " / Next y: " + yPos + "-> " + yPos + nextY);
                                 return true;
                             }
                         }
@@ -145,7 +149,7 @@ public class RobotController : MonoBehaviour
                         {
                             if (StoneGrid._grid[xPos + nextX, yPos + nextY] == 1)
                             {
-                                Debug.Log("Next x:" + xPos + "-> " + nextX + " / Next y: " + xPos + "-> " + nextY);
+                                Debug.Log("Next x:" + xPos + "-> " + xPos + nextX + " / Next y: " + yPos + "-> " + yPos + nextY);
                                 return true;
                             }
                         }

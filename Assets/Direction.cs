@@ -39,10 +39,10 @@ namespace Assets
                     return new List<int> { 0, 1 };
 
                 case Direction.down:
-                    return new List<int> { 2, 3 };
+                    return new List<int> { 3, 2 };
 
                 case Direction.left:
-                    return new List<int> { 0, 2 };
+                    return new List<int> { 2, 0 };
 
                 case Direction.right:
                     return new List<int> { 1, 3 };

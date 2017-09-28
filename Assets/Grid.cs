@@ -40,7 +40,7 @@ namespace Assets
                         _grid[x, y] = 1;
                     }
 
-                    if (x == 5 && y == 4)
+                    if (x == 5 && y == 4 )
                     {
                         _grid[x, y] = 1;
                     }

@@ -16,43 +16,43 @@ namespace Assets
 
         public static readonly int gridWidth = 16;
         public static readonly int gridHeight = 30;
-        public int[,] _grid;
+        public int[,] Cells;
 
         public Grid()
         {
-            _grid = new int[gridWidth, gridHeight];
+            Cells = new int[gridWidth, gridHeight];
             for(int y = 0; y < gridHeight; y++)
             {
                 for (int x = 0; x < gridWidth; x ++)
                 {
                     if(x == 3 && y == 1)
                     {
-                        _grid[x,y] = 1;
+                        Cells[x,y] = 1;
                     }
 
                     if (x == 7 && y == 10)
                     {
-                        _grid[x, y] = 1;
+                        Cells[x, y] = 1;
                     }
 
                     if (x == 4 && y == 12)
                     {
-                        _grid[x, y] = 1;
+                        Cells[x, y] = 1;
                     }
 
                     if (x == 5 && y == 4 )
                     {
-                        _grid[x, y] = 1;
+                        Cells[x, y] = 1;
                     }
 
                     if (x == 8 &&  y == 20)
                     {
-                        _grid[x, y] = 1;
+                        Cells[x, y] = 1;
                     }
 
                     if (x == 4 && y == 10)
                     {
-                        _grid[x, y] = 1;
+                        Cells[x, y] = 1;
                     }
                 }
             }

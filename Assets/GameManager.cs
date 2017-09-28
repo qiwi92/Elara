@@ -7,18 +7,21 @@ namespace Assets
 {
 public class GameManager : MonoBehaviour {
 
-    public static Grid StoneGrid = new Grid();
+    public Grid MyGrid = new Grid();
 
-    public List<GameObject> Stones;
+    public List<GameObject> StonePrefabs;
+    public Dictionary<Vector2, GameObject> StoneInstances = new Dictionary<Vector2, GameObject>();
 
-	void Start () {
+        void Start () {
         for (int y = 0; y < Grid.gridHeight; y++)
         {
             for (int x = 0; x < Grid.gridWidth; x++)
             {
-                if(StoneGrid._grid[x, y] == 1)
+                if(MyGrid.Cells[x, y] == 1)
                 {
-                    Instantiate(Stones[0],new Vector3(Grid.GridXOffset+x*Grid.GridUnit,y*Grid.GridUnit,0),transform.rotation);
+                    
+                    GameObject tempStoneInstance = Instantiate(StonePrefabs[0],new Vector3(Grid.GridXOffset+x*Grid.GridUnit,y*Grid.GridUnit,0),transform.rotation);
+                    StoneInstances.Add(new Vector2(x, y), tempStoneInstance);
                 }
             }
         }

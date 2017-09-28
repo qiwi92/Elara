@@ -8,22 +8,20 @@ public class RobotController : MonoBehaviour
 {
     public List<GameObject> Cubes;
 
-    private Grid StoneGrid = new Grid();
-
     private float velocity = 300f;
     private float timeToMove;
     private const float RestTime = 0.1f;
     private const float RestTimeBetween = 0.05f;
 
     public LeanTweenType TweenType;
+    public  GameManager MyGameManager;
 
-    private Grid _grid = new Grid();
-    private Direction direction;
+    private Direction _direction;
 
 	private void Start()
     {
         
-        direction = Direction.up;
+        _direction = Direction.up;
         timeToMove = Grid.GridUnit / velocity;
 
         Cubes[0].transform.position = new Vector3(Grid.GridXOffset + Grid.GridUnit * 3, Grid.GridUnit*3, 0);
@@ -41,16 +39,23 @@ public class RobotController : MonoBehaviour
     {
         while (true)
         {
-            yield return StartCoroutine(MoveParts(direction.FrontMoveGroup(), timeToMove));
+            
+
+            yield return StartCoroutine(MineStone());
+
+            ChooseNextDirection();
+
+            yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
 
             yield return new WaitForSeconds(RestTimeBetween);
 
+
             // Later maybe check whether to move second part based on collisions
-            yield return StartCoroutine(MoveParts(direction.Opposite().FrontMoveGroup(), timeToMove));
+            yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
 
             yield return new WaitForSeconds(RestTime);
             
-            ChooseNextDirection();
+            
 
             //yield return new WaitForSeconds(1f);
 
@@ -59,89 +64,140 @@ public class RobotController : MonoBehaviour
     
     private IEnumerator MoveParts(List<int> moveGroupIndices, float duration)
     {
-        LeanTween.move(Cubes[moveGroupIndices[0]], Cubes[moveGroupIndices[0]].transform.position + direction.DirectionToVector() * Grid.GridUnit, duration).setEase(TweenType);
-        LeanTween.move(Cubes[moveGroupIndices[1]], Cubes[moveGroupIndices[1]].transform.position + direction.DirectionToVector() * Grid.GridUnit, duration).setEase(TweenType);
+        LeanTween.move(Cubes[moveGroupIndices[0]], Cubes[moveGroupIndices[0]].transform.position + _direction.DirectionToVector() * Grid.GridUnit, duration).setEase(TweenType);
+        LeanTween.move(Cubes[moveGroupIndices[1]], Cubes[moveGroupIndices[1]].transform.position + _direction.DirectionToVector() * Grid.GridUnit, duration).setEase(TweenType);
 
         yield return new WaitForSeconds(duration);
     }
-    
+
+    private IEnumerator MineStone()
+    {
+        List<int> moveGroupIndicesAfterTurn = _direction.FrontMoveGroup();
+
+        for (int i = 0; i < moveGroupIndicesAfterTurn.Count; i++)
+        {
+            CollisionType obstacle = MyCollision.Check(Cubes[moveGroupIndicesAfterTurn[i]], _direction,MyGameManager.MyGrid);
+            if (obstacle == CollisionType.Stone)
+            {
+                if (i == 0)
+                {
+                    int nextX = (int)_direction.DirectionToVector().x + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).x;
+                    int nextY = (int)_direction.DirectionToVector().y + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).y;
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    _direction = _direction.TurnLeft();
+                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    _direction = _direction.TurnRight();
+                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+
+                    yield return new WaitForSeconds(2f);
+
+
+                    Destroy(MyGameManager.StoneInstances[new Vector2(nextX, nextY)]);
+                    MyGameManager.MyGrid.Cells[nextX, nextY] = 0;
+
+
+
+
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    _direction = _direction.TurnLeft();
+                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+                    
+
+
+                }
+                else
+                {
+
+                    int nextX = (int)_direction.DirectionToVector().x + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).x;
+                    int nextY = (int)_direction.DirectionToVector().y + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).y;
+
+                    _direction = _direction.TurnRight();
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+
+                    _direction = _direction.TurnLeft();
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+
+                    yield return new WaitForSeconds(2f);
+
+                    Destroy(MyGameManager.StoneInstances[new Vector2(nextX, nextY)]);
+                    MyGameManager.MyGrid.Cells[nextX, nextY] = 0;
+
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+
+                    _direction = _direction.TurnRight();
+                    yield return new WaitForSeconds(RestTimeBetween);
+                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+                }
+
+                
+
+
+
+            }
+
+        }
+
+        yield return null;
+
+    }
+
     private void ChooseNextDirection()
     {
-        List<int> moveGroupIndices = direction.FrontMoveGroup();
-        for (int i = 0; i < 2; i++)
-        {
-            int xPos = (int)GridTools.GridPosition(Cubes[moveGroupIndices[i]].transform.position).x;
-            int yPos = (int)GridTools.GridPosition(Cubes[moveGroupIndices[i]].transform.position).y;
-            int nextX =  (int)direction.DirectionToVector().x;
-            int nextY =  (int)direction.DirectionToVector().y;
-            Debug.Log("x:" + xPos + " + ("+ nextX + ") / y: " + yPos + " + (" + nextY + ")");
-        }
-
-        bool col = false;
-        while (col == false)
+        bool col = true;
+        while (col == true)
         {
 
-            int decider = UnityEngine.Random.Range(0, 3);
-            if (decider == 0)
+            _direction = GetRandomDirection(_direction);
+
+            List<int> moveGroupIndicesAfterTurn = _direction.FrontMoveGroup();
+
+            int collisionCount = 0;
+
+            for (int i = 0; i < moveGroupIndicesAfterTurn.Count; i++)
             {
-                direction = direction.TurnLeft();
-            }
-            else if (decider == 1)
-            {
-                direction = direction.TurnRight();
-            }
-
-
-            List<int> moveGroupIndicesAfterTurn = direction.FrontMoveGroup();
-            //bool collision = CheckGridCollision(moveGroupIndicesAfterTurn, direction);
-            bool collisionStone = Collision(moveGroupIndicesAfterTurn, direction);
-            if (collisionStone == true) 
-            {
-                Debug.Log("Col");
-            }
-
-            else
-            {
-                col = true;
-            }
-            
-        }
-
-
-            
-
-    }
-    
-
-
-    private bool Collision(List<int> moveGroupIndices, Direction direction)
-    {
-        for (int i = 0; i < moveGroupIndices.Count; i++)
-        {
-            int xPos = (int)GridTools.GridPosition(Cubes[moveGroupIndices[i]].transform.position).x;
-            int yPos = (int)GridTools.GridPosition(Cubes[moveGroupIndices[i]].transform.position).y;
-            int nextX = (int)direction.DirectionToVector().x;
-            int nextY = (int)direction.DirectionToVector().y;
-
-            if (xPos +nextX < Grid.gridWidth && xPos + nextX >= 0 && yPos + nextY < Grid.gridHeight && yPos + nextY >= 0)
-            {
-                for (int y = 0; y < Grid.gridHeight; y++)
+                CollisionType obstacle = MyCollision.Check(Cubes[moveGroupIndicesAfterTurn[i]], _direction,MyGameManager.MyGrid);
+                if (obstacle == CollisionType.GridEdge || obstacle == CollisionType.Stone)
                 {
-                    for (int x = 0; x < Grid.gridWidth; x++)
-                    {
-                        if (StoneGrid._grid[xPos + nextX, yPos + nextY] == 1)
-                        {
-
-                            return true;
-                        }    
-                    }
+                    Debug.Log("Collided with " + obstacle);
+                    collisionCount++;
                 }
             }
-            else
+
+            if(collisionCount == 0)
             {
-                return true;
+                col = false;
             }
         }
-        return false;
     }
+
+    private Direction GetRandomDirection(Direction direction)
+    {
+        int decider = UnityEngine.Random.Range(0, 7);
+        if (decider == 0)
+        {
+            direction = direction.TurnLeft();
+        }
+        else if (decider == 1)
+        {
+            direction = direction.TurnRight();
+        }
+        return direction;
+    }
+
+
 }

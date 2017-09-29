@@ -72,79 +72,51 @@ public class RobotController : MonoBehaviour
 
     private IEnumerator MineStone()
     {
-        List<int> moveGroupIndicesAfterTurn = _direction.FrontMoveGroup();
+        List<int> moveGroupIndices = _direction.FrontMoveGroup();
 
-        for (int i = 0; i < moveGroupIndicesAfterTurn.Count; i++)
+
+
+        List<Direction> minePatternDirection;
+
+
+        for (int i = 0; i < moveGroupIndices.Count; i++)
         {
-            CollisionType obstacle = MyCollision.Check(Cubes[moveGroupIndicesAfterTurn[i]], _direction,MyGameManager.MyGrid);
+            CollisionType obstacle = MyCollision.Check(Cubes[moveGroupIndices[i]], _direction,MyGameManager.MyGrid);
             if (obstacle == CollisionType.Stone)
             {
+                int nextX = (int)_direction.DirectionToVector().x + (int)GridTools.GridPosition(Cubes[moveGroupIndices[i]].transform.position).x;
+                int nextY = (int)_direction.DirectionToVector().y + (int)GridTools.GridPosition(Cubes[moveGroupIndices[i]].transform.position).y;
+
                 if (i == 0)
                 {
-                    int nextX = (int)_direction.DirectionToVector().x + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).x;
-                    int nextY = (int)_direction.DirectionToVector().y + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).y;
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    _direction = _direction.TurnLeft();
-                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    _direction = _direction.TurnRight();
-                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
-
-                    yield return new WaitForSeconds(2f);
-
-
-                    Destroy(MyGameManager.StoneInstances[new Vector2(nextX, nextY)]);
-                    MyGameManager.MyGrid.Cells[nextX, nextY] = 0;
-
-
-
-
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
-
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    _direction = _direction.TurnLeft();
-                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
-                    
-
-
+                    minePatternDirection = new List<Direction> { _direction.TurnLeft(), _direction.TurnLeft().TurnRight(), _direction.TurnLeft().TurnRight().TurnLeft() };
                 }
                 else
                 {
-
-                    int nextX = (int)_direction.DirectionToVector().x + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).x;
-                    int nextY = (int)_direction.DirectionToVector().y + (int)GridTools.GridPosition(Cubes[moveGroupIndicesAfterTurn[i]].transform.position).y;
-
-                    _direction = _direction.TurnRight();
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
-
-                    _direction = _direction.TurnLeft();
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
-
-                    yield return new WaitForSeconds(2f);
-
-                    Destroy(MyGameManager.StoneInstances[new Vector2(nextX, nextY)]);
-                    MyGameManager.MyGrid.Cells[nextX, nextY] = 0;
-
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
-
-                    _direction = _direction.TurnRight();
-                    yield return new WaitForSeconds(RestTimeBetween);
-                    yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+                    minePatternDirection= new List<Direction> { _direction.TurnRight(), _direction.TurnRight().TurnLeft(), _direction.TurnRight().TurnLeft().TurnRight() };
                 }
 
-                
+                _direction = minePatternDirection[0];
+                yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+
+                _direction = minePatternDirection[1];
+                yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+
+                yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+
+                yield return StartCoroutine(MoveParts(_direction.FrontMoveGroup(), timeToMove));
+
+                yield return new WaitForSeconds(2f);
+
+
+                Destroy(MyGameManager.StoneInstances[new Vector2(nextX, nextY)]);
+                MyGameManager.MyGrid.Cells[nextX, nextY] = 0;
+
+                yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+
+                _direction =  minePatternDirection[2];
+                yield return StartCoroutine(MoveParts(_direction.Opposite().FrontMoveGroup(), timeToMove));
+
 
 
 
